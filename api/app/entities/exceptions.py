@@ -18,7 +18,19 @@ class UserAlreadyExistError(ServiceError):
     pass
 
 
+class UserNotFound(ServiceError):
+    """Raised when ..."""
+
+    pass
+
+
 class UserNotUpdated(ServiceError):
+    """Raised when ..."""
+
+    pass
+
+
+class WrongCredentialsError(ServiceError):
     """Raised when ..."""
 
     pass

@@ -1,7 +1,9 @@
 import time
 import uuid
+import bcrypt
+from bcrypt import checkpw
 
-from api.app.entities.exceptions import UserNotUpdated, UserAlreadyExistError, DataNotFoundError
+from api.app.entities.exceptions import UserNotUpdated, UserAlreadyExistError, DataNotFoundError, WrongCredentialsError
 from api.app.entities.persistence_models import UserCreationPersistenceModel
 from api.ports.db_port_interface import DBMainInterface
 
@@ -17,12 +19,14 @@ class Users:
         user_name: str,
         group_id: str,
         role_ids: list[str],
-        email: str
+        email: str,
+        password: str
     ) -> dict:
         time_ = int(time.time() * 1000)
         return UserCreationPersistenceModel(
             id=doc_id,
             user_name=user_name,
+            password=password,
             group_id=group_id,
             role_ids=role_ids,
             email=email,
@@ -31,15 +35,16 @@ class Users:
             modified_by=None,
         ).dict()
 
-    def create_user(self, user_name: str, group_id: str, role_ids: list[str], email: str, **kwargs):
+    def create_user(self, user_name: str, group_id: str, role_ids: list[str], email: str, password: str, **kwargs):
         results = self.db.query(collection=self.__user_collection, filters=[("email", "==", email)])
         if results:
             user_id = results[0].get("id")
             raise UserAlreadyExistError(f"User Already exist: UserId: {user_id}")
 
         doc_id = str(uuid.uuid4())
+        hash_pwd = self.hash_password(password)
         document_data = self.user_doc_model(
-            doc_id, user_name, group_id, role_ids, email
+            doc_id, user_name, group_id, role_ids, email, hash_pwd
         )
         self.db.create(
             collection="users", document_id=doc_id, document_data=document_data
@@ -78,3 +83,9 @@ class Users:
             raise DataNotFoundError(f"User Id: {user_id} not found!")
         return {"user": self.db.get(collection=self.__user_collection, document_id=user_id)}
 
+    @staticmethod
+    def hash_password(pwd: str) -> str:
+        bytes_pwd = pwd.encode("utf-8")
+        salt = bcrypt.gensalt()
+        hash_pwd = bcrypt.hashpw(bytes_pwd, salt).decode("utf-8")
+        return hash_pwd

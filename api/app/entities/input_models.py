@@ -4,6 +4,7 @@ from typing import List, Optional
 
 class UserCreationInput(BaseModel):
     user_name: constr(min_length=3)
+    password: constr(min_length=3)
     group_id: constr(min_length=3)
     role_ids: List[str]
     email: EmailStr

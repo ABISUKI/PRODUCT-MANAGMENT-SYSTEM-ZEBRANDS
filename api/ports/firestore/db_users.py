@@ -92,7 +92,8 @@ class DBMainFirestore(DBMainInterface):
     def get(self, collection: str, document_id: str) -> dict:
         doc_ref = self.db_client.collection(collection).document(document_id)
         doc = doc_ref.get()
-        return doc.to_dict()
+        doc = doc.to_dict()
+        return doc if doc else {}
 
     def query(self, collection: str, filters: list, limit: int = 500) -> List[dict]:
         try:

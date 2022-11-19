@@ -4,3 +4,5 @@ fastapi==0.74.1
 uvicorn==0.17.5
 firebase-admin
 pydantic[email]
+bcrypt
+python-multipart

@@ -7,5 +7,5 @@ from api.ports.firestore.db_users import DBMainFirestore
 
 
 class Container(containers.DeclarativeContainer):
-    wiring_config = containers.WiringConfiguration(modules=["api.adapters.rest.products"])
+    wiring_config = containers.WiringConfiguration(modules=["api.adapters.rest.users"])
     db_firestore = providers.Factory(DBMainFirestore)

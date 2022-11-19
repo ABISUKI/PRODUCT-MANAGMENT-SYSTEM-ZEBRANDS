@@ -4,9 +4,12 @@ from pydantic import ValidationError
 
 import logging
 
-from api.app.entities.exceptions import UserNotUpdated, UserAlreadyExistError, DataNotFoundError
+from api.app.entities.exceptions import UserNotUpdated, UserAlreadyExistError, DataNotFoundError, WrongCredentialsError, \
+    UserNotFound
+from api.ports.auth.auth import InvalidBearerToken, AccessDenied
 from api.ports.firestore.db_users import DBDocumentNotFound, DBInvalidQuery
 from api.utils.response import Response, Status
+from jwt.exceptions import ExpiredSignatureError
 
 
 class ControllerExceptionHandler(object):
@@ -34,6 +37,11 @@ class ControllerExceptionHandler(object):
                 response.add_error(str(err.message))
                 response.set_response(Status.BAD_REQUEST, {})
                 response_root.status_code = Status.BAD_REQUEST.value
+            except WrongCredentialsError as err:
+                logging.error(err)
+                response.add_error(str(err.message))
+                response.set_response(Status.FAILED, {})
+                response_root.status_code = 401
             except Exception as err:
                 err_details = str(traceback.format_exc())
                 logging.error(err)
@@ -68,7 +76,7 @@ class ControllerExceptionHandler(object):
                 response.add_error(str(err.message))
                 response.set_response(Status.FAILED, {})
                 response_root.status_code = Status.FAILED.value
-            except (DBDocumentNotFound, DataNotFoundError) as err:
+            except (DBDocumentNotFound, DataNotFoundError, UserNotFound) as err:
                 logging.error(err)
                 response.add_error(str(err.message))
                 response.set_response(Status.NOT_FOUND, {})
@@ -78,6 +86,16 @@ class ControllerExceptionHandler(object):
                 response.add_error(str(err.message))
                 response.set_response(Status.FAILED, {})
                 response_root.status_code = Status.FAILED.value
+            except WrongCredentialsError as err:
+                logging.error(err)
+                response.add_error(str(err.message))
+                response.set_response(Status.FAILED, {})
+                response_root.status_code = 401
+            except (ExpiredSignatureError, InvalidBearerToken, AccessDenied) as err:
+                logging.error(err)
+                response.add_error(str(err))
+                response.set_response(Status.FAILED, {})
+                response_root.status_code = 401
             except Exception as err:
                 err_details = str(traceback.format_exc())
                 logging.error(err)
