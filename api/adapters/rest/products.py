@@ -2,6 +2,8 @@ from fastapi import APIRouter, Request, Depends, Response
 
 from api.adapters.rest.users import bearer_auth
 from api.app.entities.input_models import ProductsCreationInput, ProductsUpdateInput, ProductDeleteInput
+from api.app.entities.outputs_models import ProductsCreationOutputBase, OutputBase, GetAllProductsOutputBase, \
+    GetProductOutputBase
 from api.app.products import Products
 from api.ports.auth.auth import Auth
 from api.ports.firestore.db_main import DBMainFirestore
@@ -11,7 +13,7 @@ router = APIRouter()
 
 
 @router.post("", status_code=201, include_in_schema=False)
-@router.post("/", status_code=201, tags=["products"])
+@router.post("/", status_code=201, tags=["products"], response_model=ProductsCreationOutputBase)
 @ControllerExceptionHandler.products
 @Auth.check_access_api
 async def add_product(response_root: Response,
@@ -23,7 +25,7 @@ async def add_product(response_root: Response,
     return products.add_product(product_creation_input)
 
 
-@router.get("", status_code=200, tags=["products"])
+@router.get("", status_code=200, tags=["products"], response_model=GetAllProductsOutputBase)
 @ControllerExceptionHandler.products
 async def get_all_products(response_root: Response,
                            request: Request,
@@ -33,7 +35,7 @@ async def get_all_products(response_root: Response,
     return products.get_all_products()
 
 
-@router.get("/{sku}", status_code=200, tags=["products"])
+@router.get("/{sku}", status_code=200, tags=["products"], response_model=GetProductOutputBase)
 @ControllerExceptionHandler.products
 async def get_product_by_sku(response_root: Response,
                              request: Request,
@@ -45,7 +47,7 @@ async def get_product_by_sku(response_root: Response,
 
 
 @router.put("", status_code=200, include_in_schema=False)
-@router.put("/", status_code=200, tags=["products"])
+@router.put("/", status_code=200, tags=["products"], response_model=OutputBase)
 @ControllerExceptionHandler.products
 @Auth.check_access_api
 async def update_product(response_root: Response,
@@ -58,7 +60,7 @@ async def update_product(response_root: Response,
 
 
 @router.delete("", status_code=200, include_in_schema=False)
-@router.delete("/", status_code=200, tags=["products"])
+@router.delete("/", status_code=200, tags=["products"], response_model=OutputBase)
 @ControllerExceptionHandler.products
 @Auth.check_access_api
 async def remove_product(response_root: Response,

@@ -3,6 +3,8 @@ from fastapi.security import HTTPBearer, HTTPBasic, HTTPBasicCredentials
 from dependency_injector.wiring import inject
 
 from api.app.entities.input_models import UserCreationInput, UserUpdateInput, UserDeleteInput
+from api.app.entities.outputs_models import LoginOutputBase, UserCreationOutputBase, GetAllUsersOutputBase, \
+    GetUserOutputBase, OutputBase
 from api.ports.auth.auth import Auth
 from api.app.users import Users
 from api.ports.firestore.db_main import DBMainFirestore
@@ -14,7 +16,7 @@ bearer_auth = HTTPBearer()
 basic_security = HTTPBasic()
 
 
-@router.get("/login", status_code=200, tags=["users"])
+@router.get("/login", status_code=200, tags=["users"], response_model=LoginOutputBase)
 @inject
 @ControllerExceptionHandler.users
 async def login(response_root: Response, credentials: HTTPBasicCredentials = Depends(basic_security), db_firestore: DBMainFirestore = Depends(DBMainFirestore)
@@ -25,7 +27,7 @@ async def login(response_root: Response, credentials: HTTPBasicCredentials = Dep
 
 
 @router.post("", status_code=201, include_in_schema=False)
-@router.post("/", status_code=201, tags=["users"])
+@router.post("/", status_code=201, tags=["users"], response_model=UserCreationOutputBase)
 @inject
 @ControllerExceptionHandler.users_creation
 @Auth.check_access_admin
@@ -41,7 +43,7 @@ async def create_user(response_root: Response,
 
 
 @router.get("", status_code=200, include_in_schema=False)
-@router.get("/", status_code=200, tags=["users"])
+@router.get("/", status_code=200, tags=["users"], response_model=GetAllUsersOutputBase)
 @inject
 @ControllerExceptionHandler.users
 @Auth.check_access_admin
@@ -69,7 +71,7 @@ async def get_user(response_root: Response,
 
 
 @router.put("", status_code=200, include_in_schema=False)
-@router.put("/", status_code=200, tags=["users"])
+@router.put("/", status_code=200, tags=["users"], response_model=GetUserOutputBase)
 @inject
 @ControllerExceptionHandler.users
 @Auth.check_access_admin
@@ -83,7 +85,7 @@ async def update_user(response_root: Response,
 
 
 @router.delete("", status_code=200, include_in_schema=False)
-@router.delete("/", status_code=200, tags=["users"])
+@router.delete("/", status_code=200, tags=["users"], response_model=OutputBase)
 @inject
 @ControllerExceptionHandler.users
 @Auth.check_access_admin
