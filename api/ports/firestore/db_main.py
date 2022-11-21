@@ -3,7 +3,7 @@ import os
 from typing import List
 
 from google.cloud import firestore as gcp_firestore
-from google.api_core.exceptions import NotFound
+from google.api_core.exceptions import NotFound, AlreadyExists
 from api.ports.db_port_interface import DBMainInterface
 
 
@@ -30,6 +30,11 @@ class DBDocumentNotFound(DBServiceError):
     pass
 
 
+class DBDocumentAlreadyExists(DBServiceError):
+    """Raised when ..."""
+    pass
+
+
 class DBMainExceptionHandler(object):
     """Class with handler tools"""
 
@@ -41,6 +46,9 @@ class DBMainExceptionHandler(object):
                 return func(self, *args, **kwargs)
             except NotFound as error:
                 raise DBDocumentNotFound(str(error))
+            except AlreadyExists as error:
+                raise DBDocumentAlreadyExists(str(error))
+
         return handler
 
 
@@ -77,7 +85,12 @@ class DBMainFirestore(DBMainInterface):
                     })
 
         self.db_client = gcp_firestore.Client(**kwargs)
+        self.db_transaction = self.db_client.transaction()
 
+    def get_doc_reference(self, collection: str, document_id: str):
+        return self.db_client.document(f"{collection}/{document_id}")
+
+    @DBMainExceptionHandler.root
     def create(self, collection: str, document_id: str, document_data: dict):
         self.db_client.document(f"{collection}/{document_id}").create(document_data)
 

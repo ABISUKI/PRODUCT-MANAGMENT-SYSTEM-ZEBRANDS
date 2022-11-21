@@ -5,7 +5,7 @@ from dependency_injector.wiring import inject
 from api.app.entities.input_models import UserCreationInput, UserUpdateInput, UserDeleteInput
 from api.ports.auth.auth import Auth
 from api.app.users import Users
-from api.ports.firestore.db_users import DBMainFirestore
+from api.ports.firestore.db_main import DBMainFirestore
 from api.utils.service_exception_handler import ControllerExceptionHandler
 
 
