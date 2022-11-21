@@ -6,7 +6,7 @@ import logging
 
 from api.app.entities.exceptions import UserNotUpdated, UserAlreadyExistError, DataNotFoundError, WrongCredentialsError, \
     UserNotFound
-from api.ports.auth.auth import InvalidBearerToken, AccessDenied
+from api.ports.auth.auth import InvalidBearerToken, AccessDenied, AuthLayerError
 from api.ports.firestore.db_main import DBDocumentNotFound, DBInvalidQuery, DBDocumentAlreadyExists
 from api.utils.response import Response, Status
 from jwt.exceptions import ExpiredSignatureError
@@ -41,6 +41,11 @@ class ControllerExceptionHandler(object):
             except WrongCredentialsError as err:
                 logging.error(err)
                 response.add_error(str(err.message))
+                response.set_response(Status.FAILED, {})
+                response_root.status_code = 401
+            except (ExpiredSignatureError, InvalidBearerToken, AccessDenied, AuthLayerError) as err:
+                logging.error(err)
+                response.add_error(str(err))
                 response.set_response(Status.FAILED, {})
                 response_root.status_code = 401
             except Exception as err:
@@ -92,7 +97,7 @@ class ControllerExceptionHandler(object):
                 response.add_error(str(err.message))
                 response.set_response(Status.FAILED, {})
                 response_root.status_code = 401
-            except (ExpiredSignatureError, InvalidBearerToken, AccessDenied) as err:
+            except (ExpiredSignatureError, InvalidBearerToken, AccessDenied, AuthLayerError) as err:
                 logging.error(err)
                 response.add_error(str(err))
                 response.set_response(Status.FAILED, {})
@@ -141,6 +146,11 @@ class ControllerExceptionHandler(object):
                 response.add_error(str(err.message))
                 response.set_response(Status.NOT_FOUND, {})
                 response_root.status_code = Status.NOT_FOUND.value
+            except (ExpiredSignatureError, InvalidBearerToken, AccessDenied, AuthLayerError) as err:
+                logging.error(err)
+                response.add_error(str(err))
+                response.set_response(Status.FAILED, {})
+                response_root.status_code = 401
             except Exception as err:
                 err_details = str(traceback.format_exc())
                 logging.error(err)

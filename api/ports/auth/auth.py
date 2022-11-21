@@ -1,5 +1,6 @@
 import functools
 import os
+import traceback
 
 import jwt
 from fastapi import Request
@@ -21,6 +22,11 @@ class InvalidBearerToken(Exception):
 
 
 class AccessDenied(Exception):
+    """Raised when ..."""
+    pass
+
+
+class AuthLayerError(Exception):
     """Raised when ..."""
     pass
 
@@ -49,7 +55,7 @@ class Auth:
         # expire time of the token
         expire = datetime.utcnow() + timedelta(minutes=15)
         to_encode.update({"exp": expire})
-        encoded_jwt = jwt.encode(to_encode, os.getenv("SECRET_KEY", "someting secret"), algorithm="HS256")
+        encoded_jwt = jwt.encode(to_encode, os.getenv("SECRET_KEY", "something-secret"), algorithm="HS256")
         # return the generated token
         return encoded_jwt
 
@@ -67,6 +73,42 @@ class Auth:
 
         @functools.wraps(func)
         async def handler(*args, **kwargs):
+            try:
+                token = kwargs.get("token")
+                request: Request = kwargs.get("request")
+                db: DBMainInterface = kwargs.get("db_firestore")
+                token_doc: dict = Auth.decode_jwt(token.credentials)
+                if not token_doc.get("exp"):
+                    raise InvalidBearerToken("Invalid bearer token format")
+                user_id = token_doc.get("user_id")
+                user_doc = db.get(collection="users", document_id=user_id)
+                if not user_doc:
+                    raise InvalidBearerToken("Invalid bearer token")
+                user_role_ids = user_doc.get("role_ids", [])
+                roles = [db.get(collection="roles", document_id=role_id) for role_id in user_role_ids]
+                print("los roles: ", roles)
+                reference_access = [referenece for role in roles
+                                    for referenece in role.get("reference_access", []) if role if role.get("role_name") in role_names]
+                if not reference_access:
+                    raise AccessDenied("Access Denied for this API - request the required permissions")
+                if request.method in reference_access:
+                    return await func(*args, **kwargs)
+                raise AccessDenied("Access Denied for this API - request the required permissions")
+            except jwt.exceptions.DecodeError as error:
+                print(traceback.format_exc())
+                raise InvalidBearerToken("Invalid bearer token format: ", str(error))
+            except Exception as error:
+                raise AuthLayerError("Error: Access error: ", str(error))
+
+        return handler
+
+    @staticmethod
+    def check_access_api(func):
+        """Exception handler for controller service logic"""
+        role_names = ["ADMIN_SUPER_ACCESS", "API_V1_ACCESS_ROOT"]
+
+        @functools.wraps(func)
+        async def handler(*args, **kwargs):
             token = kwargs.get("token")
             request: Request = kwargs.get("request")
             db: DBMainInterface = kwargs.get("db_firestore")
@@ -80,7 +122,8 @@ class Auth:
             user_role_ids = user_doc.get("role_ids", [])
             roles = [db.get(collection="roles", document_id=role_id) for role_id in user_role_ids]
             reference_access = [referenece for role in roles
-                                for referenece in role.get("reference_access", []) if role if role.get("role_name") in role_names]
+                                for referenece in role.get("reference_access", []) if role if
+                                role.get("role_name") in role_names]
             if not reference_access:
                 raise AccessDenied("Access Denied for this API - request the required permissions")
             if request.method in reference_access:
@@ -91,5 +134,8 @@ class Auth:
 
     @staticmethod
     def decode_jwt(token: str) -> dict:
-        decoded_token = jwt.decode(token, os.getenv("SECRET_KEY", "someting secret"), algorithms=["HS256"])
+        try:
+            decoded_token = jwt.decode(token, os.getenv("SECRET_KEY", "something-secret"), algorithms=["HS256"])
+        except Exception as error:
+            raise InvalidBearerToken("Invalid bearer token: ", str(error))
         return decoded_token

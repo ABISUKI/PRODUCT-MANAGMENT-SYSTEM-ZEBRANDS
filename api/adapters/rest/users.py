@@ -74,7 +74,10 @@ async def get_user(response_root: Response,
 @inject
 @ControllerExceptionHandler.users
 @Auth.check_access_admin
-async def update_user(response_root: Response, request: Request, db_firestore: DBMainFirestore = Depends(DBMainFirestore)):
+async def update_user(response_root: Response,
+                      request: Request,
+                      token: str = Depends(bearer_auth),
+                      db_firestore: DBMainFirestore = Depends(DBMainFirestore)):
     body = await request.json()
     print(f"Update: {body}")
     user_update_input = UserUpdateInput(**body)
@@ -87,7 +90,10 @@ async def update_user(response_root: Response, request: Request, db_firestore: D
 @inject
 @ControllerExceptionHandler.users
 @Auth.check_access_admin
-async def delete_user(response_root: Response, request: Request, db_firestore: DBMainFirestore = Depends(DBMainFirestore)):
+async def delete_user(response_root: Response,
+                      request: Request,
+                      token: str = Depends(bearer_auth),
+                      db_firestore: DBMainFirestore = Depends(DBMainFirestore)):
     body = await request.json()
     print(f"Deleted: {body}")
     body = UserDeleteInput(**body).dict()
