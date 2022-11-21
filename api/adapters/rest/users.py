@@ -14,7 +14,7 @@ bearer_auth = HTTPBearer()
 basic_security = HTTPBasic()
 
 
-@router.get("/login", status_code=200)
+@router.get("/login", status_code=200, tags=["users"])
 @inject
 @ControllerExceptionHandler.users
 async def login(response_root: Response, credentials: HTTPBasicCredentials = Depends(basic_security), db_firestore: DBMainFirestore = Depends(DBMainFirestore)
@@ -25,24 +25,23 @@ async def login(response_root: Response, credentials: HTTPBasicCredentials = Dep
 
 
 @router.post("", status_code=201, include_in_schema=False)
-@router.post("/", status_code=201)
+@router.post("/", status_code=201, tags=["users"])
 @inject
 @ControllerExceptionHandler.users_creation
 @Auth.check_access_admin
 async def create_user(response_root: Response,
                       request: Request,
+                      user_creation_input: UserCreationInput,
                       token: str = Depends(bearer_auth),
                       db_firestore: DBMainFirestore = Depends(DBMainFirestore)
 ):
-    body = await request.json()
-    print(f"Create: {body}")
-    user_creation_input = UserCreationInput(**body)
+
     users = Users(db_firestore)
     return users.create_user(user_creation_input)
 
 
 @router.get("", status_code=200, include_in_schema=False)
-@router.get("/", status_code=200)
+@router.get("/", status_code=200, tags=["users"])
 @inject
 @ControllerExceptionHandler.users
 @Auth.check_access_admin
@@ -55,7 +54,7 @@ async def get_all_users(response_root: Response,
     return users.get_all_users()
 
 
-@router.get("/{user_id}", status_code=200)
+@router.get("/{user_id}", status_code=200, tags=["users"])
 @inject
 @ControllerExceptionHandler.users
 @Auth.check_access_admin
@@ -70,32 +69,28 @@ async def get_user(response_root: Response,
 
 
 @router.put("", status_code=200, include_in_schema=False)
-@router.put("/", status_code=200)
+@router.put("/", status_code=200, tags=["users"])
 @inject
 @ControllerExceptionHandler.users
 @Auth.check_access_admin
 async def update_user(response_root: Response,
                       request: Request,
+                      user_update_input: UserUpdateInput,
                       token: str = Depends(bearer_auth),
                       db_firestore: DBMainFirestore = Depends(DBMainFirestore)):
-    body = await request.json()
-    print(f"Update: {body}")
-    user_update_input = UserUpdateInput(**body)
     users = Users(db_firestore)
     return users.update_user(user_update_input)
 
 
 @router.delete("", status_code=200, include_in_schema=False)
-@router.delete("/", status_code=200)
+@router.delete("/", status_code=200, tags=["users"])
 @inject
 @ControllerExceptionHandler.users
 @Auth.check_access_admin
 async def delete_user(response_root: Response,
                       request: Request,
+                      user_delete_input: UserDeleteInput,
                       token: str = Depends(bearer_auth),
                       db_firestore: DBMainFirestore = Depends(DBMainFirestore)):
-    body = await request.json()
-    print(f"Deleted: {body}")
-    body = UserDeleteInput(**body).dict()
     users = Users(db_firestore)
-    return users.delete_user(**body)
+    return users.delete_user(user_delete_input)

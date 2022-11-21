@@ -97,8 +97,6 @@ class Auth:
             except jwt.exceptions.DecodeError as error:
                 print(traceback.format_exc())
                 raise InvalidBearerToken("Invalid bearer token format: ", str(error))
-            except Exception as error:
-                raise AuthLayerError("Error: Access error: ", str(error))
 
         return handler
 

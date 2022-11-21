@@ -28,11 +28,6 @@ class ControllerExceptionHandler(object):
                 response_root.status_code = 201
                 results = await func(*args, **kwargs)
                 response.set_response(Status.OK, results)
-            except ValidationError as err:
-                logging.error(err)
-                response.add_error(str(err.errors()))
-                response.set_response(Status.BAD_REQUEST, {})
-                response_root.status_code = Status.BAD_REQUEST.value
             except UserAlreadyExistError as err:
                 logging.error(err)
                 response.add_error(str(err.message))
@@ -72,11 +67,6 @@ class ControllerExceptionHandler(object):
                 response_root.status_code = 200
                 results = await func(*args, **kwargs)
                 response.set_response(Status.OK, results)
-            except ValidationError as err:
-                logging.error(err)
-                response.add_error(str(err.errors()))
-                response.set_response(Status.BAD_REQUEST, {})
-                response_root.status_code = Status.BAD_REQUEST.value
             except UserNotUpdated as err:
                 logging.error(err)
                 response.add_error(str(err.message))
@@ -126,11 +116,6 @@ class ControllerExceptionHandler(object):
                 response_root.status_code = 200
                 results = await func(*args, **kwargs)
                 response.set_response(Status.OK, results)
-            except ValidationError as err:
-                logging.error(err)
-                response.add_error(str(err.errors()))
-                response.set_response(Status.BAD_REQUEST, {})
-                response_root.status_code = Status.BAD_REQUEST.value
             except WrongCredentialsError as err:
                 logging.error(err)
                 response.add_error(str(err.message))
