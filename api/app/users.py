@@ -3,7 +3,7 @@ import uuid
 import bcrypt
 
 from api.app.entities.exceptions import UserNotUpdated, UserAlreadyExistError, DataNotFoundError, WrongCredentialsError
-from api.app.entities.input_models import UserUpdateInput, UserCreationInput
+from api.app.entities.input_models import UserUpdateInput, UserCreationInput, UserDeleteInput
 from api.app.entities.persistence_models import UserCreationPersistenceModel
 from api.ports.db_port_interface import DBMainInterface
 
@@ -72,8 +72,8 @@ class Users:
         )
         return {"updated": doc_to_update}
 
-    def delete_user(self, user_id: str, **kwargs):
-        self.db.delete(collection=self.__user_collection, document_id=user_id)
+    def delete_user(self, user_delete_input: UserDeleteInput):
+        self.db.delete(collection=self.__user_collection, document_id=user_delete_input.user_id)
         print("Deleted!")
         return {}
 
