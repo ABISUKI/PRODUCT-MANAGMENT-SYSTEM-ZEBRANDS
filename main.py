@@ -1,9 +1,11 @@
 import uvicorn
 
 from fastapi import FastAPI
-
 from api.adapters.rest import api_router
+from deps import Container
 
+
+container = Container()
 app = FastAPI()
 app.include_router(api_router, prefix="/v1.0")
 
