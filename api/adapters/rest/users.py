@@ -36,9 +36,9 @@ async def create_user(response_root: Response,
 ):
     body = await request.json()
     print(f"Create: {body}")
-    body = UserCreationInput(**body).dict()
+    user_creation_input = UserCreationInput(**body)
     users = Users(db_firestore)
-    return users.create_user(**body)
+    return users.create_user(user_creation_input)
 
 
 @router.get("", status_code=200, include_in_schema=False)
@@ -77,9 +77,9 @@ async def get_user(response_root: Response,
 async def update_user(response_root: Response, request: Request, db_firestore: DBMainFirestore = Depends(DBMainFirestore)):
     body = await request.json()
     print(f"Update: {body}")
-    body = UserUpdateInput(**body).dict()
+    user_update_input = UserUpdateInput(**body)
     users = Users(db_firestore)
-    return users.update_user(**body)
+    return users.update_user(user_update_input)
 
 
 @router.delete("", status_code=200, include_in_schema=False)

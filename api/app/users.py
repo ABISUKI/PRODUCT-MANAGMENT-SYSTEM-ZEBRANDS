@@ -3,6 +3,7 @@ import uuid
 import bcrypt
 
 from api.app.entities.exceptions import UserNotUpdated, UserAlreadyExistError, DataNotFoundError, WrongCredentialsError
+from api.app.entities.input_models import UserUpdateInput, UserCreationInput
 from api.app.entities.persistence_models import UserCreationPersistenceModel
 from api.ports.db_port_interface import DBMainInterface
 
@@ -34,25 +35,28 @@ class Users:
             modified_by=None,
         ).dict()
 
-    def create_user(self, user_name: str, group_id: str, role_ids: list[str], email: str, password: str, **kwargs):
-        results = self.db.query(collection=self.__user_collection, filters=[("email", "==", email)])
+    def create_user(self, user_creation_input: UserCreationInput):
+        results = self.db.query(collection=self.__user_collection, filters=[("email", "==", user_creation_input.email)])
         if results:
             user_id = results[0].get("id")
             raise UserAlreadyExistError(f"User Already exist: UserId: {user_id}")
 
         doc_id = str(uuid.uuid4())
-        hash_pwd = self.hash_password(password)
+        hash_pwd = self.hash_password(user_creation_input.password)
         document_data = self.user_doc_model(
-            doc_id, user_name, group_id, role_ids, email, hash_pwd
+            doc_id, user_creation_input.user_name, user_creation_input.group_id, user_creation_input.role_ids, user_creation_input.email, hash_pwd
         )
         self.db.create(
             collection="users", document_id=doc_id, document_data=document_data
         )
         return document_data
 
-    def update_user(self, user_id: str, user_name: str = None, group_id: str = None, role_ids: list[str] = None, email: str = None, **kwargs):
+    def update_user(self, user_update_input: UserUpdateInput):
         doc_to_update = {}
-        document_data = {"user_name": user_name, "group_id": group_id, "role_ids": role_ids, "email": email}
+        document_data = {"user_name": user_update_input.user_name,
+                         "group_id": user_update_input.group_id,
+                         "role_ids": user_update_input.role_ids,
+                         "email": user_update_input.email}
         for field in document_data:
             if document_data.get(field):
                 doc_to_update.update({field: document_data.get(field)})
@@ -64,7 +68,7 @@ class Users:
 
         doc_to_update.update({"updated_at": time_})
         self.db.update(
-            collection=self.__user_collection, document_id=user_id, document_data=doc_to_update
+            collection=self.__user_collection, document_id=user_update_input.user_id, document_data=doc_to_update
         )
         return {"updated": doc_to_update}
 

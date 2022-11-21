@@ -3,7 +3,7 @@ import time
 from pydantic import ValidationError
 from firebase_admin import firestore
 from google.cloud.firestore import DocumentReference, Transaction, DocumentSnapshot
-from api.app.entities.exceptions import ProductModelError, ProductNotUpdated, DataNotFoundError
+from api.app.entities.exceptions import ProductModelError, ProductNotUpdated, DataNotFoundError, SkuGenerationError
 from api.app.entities.input_models import ProductsUpdateInput, UserCreationInput, ProductsCreationInput, \
     ProductDeleteInput
 from api.app.entities.persistence_models import ProductsPersistenceModel
@@ -16,9 +16,12 @@ class Products:
         self.__products_collection = "products"
 
     @staticmethod
-    def generate_sku(model: str, brand: str, name: str):
-        sku = name[:-4] + "-" + brand + "-" + model
-        return sku.upper()
+    def generate_sku(model: str, brand: str, name: str) -> str:
+        try:
+            sku = name[:-1] + "-" + brand + "-" + model
+            return sku.upper()
+        except Exception as error:
+            raise SkuGenerationError(f"Error genrating sku: {error}")
 
     @staticmethod
     def doc_model(
@@ -45,17 +48,16 @@ class Products:
         ).dict()
 
     def add_product(self, product_creation_input: ProductsCreationInput) -> dict:
-
-        document_data = self.doc_model(doc_id=product_creation_input.serial_number,
-                                       serial_number=product_creation_input.serial_number,
-                                       model=product_creation_input.model,
-                                       brand=product_creation_input.brand.upper(),
-                                       price=product_creation_input.price,
-                                       name=product_creation_input.name.upper(),
-                                       sku=self.generate_sku(product_creation_input.model,
-                                                             product_creation_input.brand,
-                                                             product_creation_input.name))
         try:
+            document_data = self.doc_model(doc_id=product_creation_input.serial_number,
+                                           serial_number=product_creation_input.serial_number,
+                                           model=product_creation_input.model,
+                                           brand=product_creation_input.brand.upper(),
+                                           price=product_creation_input.price,
+                                           name=product_creation_input.name.upper(),
+                                           sku=self.generate_sku(product_creation_input.model,
+                                                                 product_creation_input.brand,
+                                                                 product_creation_input.name))
             self.db.create(
                 collection=self.__products_collection, document_id=product_creation_input.serial_number, document_data=document_data
             )
