@@ -25,3 +25,24 @@ class UserUpdateInput(BaseModel):
 class UserDeleteInput(BaseModel):
     user_id: constr(min_length=3)
     reason: constr(min_length=3)
+
+
+class ProductsCreationInput(BaseModel):
+    serial_number: constr(min_length=1)
+    model: constr(min_length=1)
+    brand: constr(min_length=1)
+    price: float
+    name: constr(min_length=1)
+
+
+class ProductsUpdateInput(BaseModel):
+    product_id: constr(min_length=1)
+    model: Optional[str]
+    brand: Optional[str]
+    price: Optional[str]
+    name: Optional[str]
+
+
+class ProductDeleteInput(BaseModel):
+    product_id: constr(min_length=1)
+    reason: constr(min_length=3)

@@ -1,7 +1,6 @@
 import time
 import uuid
 import bcrypt
-from bcrypt import checkpw
 
 from api.app.entities.exceptions import UserNotUpdated, UserAlreadyExistError, DataNotFoundError, WrongCredentialsError
 from api.app.entities.persistence_models import UserCreationPersistenceModel

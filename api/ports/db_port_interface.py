@@ -27,3 +27,7 @@ class DBMainInterface(metaclass=ABCMeta):
     @abstractmethod
     def get_all(self, collection: str) -> List[dict]:
         pass
+
+    @abstractmethod
+    def get_doc_reference(self, collection: str, document_id: str):
+        pass

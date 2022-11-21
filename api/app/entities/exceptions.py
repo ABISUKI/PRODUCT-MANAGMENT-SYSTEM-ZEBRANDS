@@ -34,3 +34,15 @@ class WrongCredentialsError(ServiceError):
     """Raised when ..."""
 
     pass
+
+
+class ProductModelError(ServiceError):
+    """Raised when ..."""
+
+    pass
+
+
+class ProductNotUpdated(ServiceError):
+    """Raised when ..."""
+
+    pass
