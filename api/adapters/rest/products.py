@@ -2,8 +2,7 @@ from fastapi import APIRouter, Request, Depends, Response
 
 from api.adapters.rest.users import bearer_auth
 from api.app.entities.input_models import ProductsCreationInput, ProductsUpdateInput, ProductDeleteInput
-from api.app.entities.outputs_models import ProductsCreationOutputBase, OutputBase, GetAllProductsOutputBase, \
-    GetProductOutputBase
+from api.app.entities.outputs_models import OutputBase, GetAllProductsOutputBase, ProductsCreationOutputBase
 from api.app.products import Products
 from api.ports.auth.auth import Auth
 from api.ports.firestore.db_main import DBMainFirestore
@@ -35,7 +34,7 @@ async def get_all_products(response_root: Response,
     return products.get_all_products()
 
 
-@router.get("/{sku}", status_code=200, tags=["products"], response_model=GetProductOutputBase)
+@router.get("/{sku}", status_code=200, tags=["products"], response_model=GetAllProductsOutputBase)
 @ControllerExceptionHandler.products
 async def get_product_by_sku(response_root: Response,
                              request: Request,

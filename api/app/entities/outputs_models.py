@@ -16,7 +16,7 @@ class LoginOutput(BaseModel):
 
 class LoginOutputBase(BaseModel):
     status: str
-    result: LoginOutput
+    result: Optional[LoginOutput]
     errors: List[str]
     timestamp: int
 
@@ -35,25 +35,34 @@ class UserCreationOutput(BaseModel):
 
 class UserCreationOutputBase(BaseModel):
     status: str
-    result: UserCreationOutput
+    result: Optional[UserCreationOutput]
     errors: List[str]
     timestamp: int
+
+
+class GetUserOutput(BaseModel):
+    user: Optional[UserCreationOutput]
 
 
 class GetUserOutputBase(BaseModel):
     status: str
-    result: UserCreationOutput
+    result: Optional[GetUserOutput]
     errors: List[str]
     timestamp: int
+
+
+class GetAllUsersOutput(BaseModel):
+    users: Optional[List[UserCreationOutput]]
 
 
 class GetAllUsersOutputBase(BaseModel):
     status: str
-    result: List[UserCreationOutput]
+    result: Optional[GetAllUsersOutput]
     errors: List[str]
     timestamp: int
 
 
+# ************** P R O D U C T S ********************************
 
 class ProductsCreationOutput(BaseModel):
     id: str
@@ -69,20 +78,17 @@ class ProductsCreationOutput(BaseModel):
 
 class ProductsCreationOutputBase(BaseModel):
     status: str
-    result: ProductsCreationOutput
+    result: Optional[ProductsCreationOutput]
     errors: List[str]
     timestamp: int
 
 
-class GetProductOutputBase(BaseModel):
-    status: str
-    result: ProductsCreationOutput
-    errors: List[str]
-    timestamp: int
+class GetAllProductsOutput(BaseModel):
+    products: Optional[List[ProductsCreationOutput]]
 
 
 class GetAllProductsOutputBase(BaseModel):
     status: str
-    result: List[ProductsCreationOutput]
+    result: Optional[GetAllProductsOutput]
     errors: List[str]
     timestamp: int

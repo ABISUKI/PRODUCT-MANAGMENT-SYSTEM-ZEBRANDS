@@ -56,7 +56,7 @@ async def get_all_users(response_root: Response,
     return users.get_all_users()
 
 
-@router.get("/{user_id}", status_code=200, tags=["users"])
+@router.get("/{user_id}", status_code=200, tags=["users"], response_model=GetUserOutputBase)
 @inject
 @ControllerExceptionHandler.users
 @Auth.check_access_admin
@@ -71,7 +71,7 @@ async def get_user(response_root: Response,
 
 
 @router.put("", status_code=200, include_in_schema=False)
-@router.put("/", status_code=200, tags=["users"], response_model=GetUserOutputBase)
+@router.put("/", status_code=200, tags=["users"], response_model=OutputBase)
 @inject
 @ControllerExceptionHandler.users
 @Auth.check_access_admin
