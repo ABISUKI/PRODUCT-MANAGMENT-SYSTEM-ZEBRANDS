@@ -46,3 +46,9 @@ class ProductNotUpdated(ServiceError):
     """Raised when ..."""
 
     pass
+
+
+class SkuGenerationError(ServiceError):
+    """Raised when ..."""
+
+    pass
