@@ -87,6 +87,9 @@ class DBMainFirestore(DBMainInterface):
         self.db_client = gcp_firestore.Client(**kwargs)
         self.db_transaction = self.db_client.transaction()
 
+    def get_db_client(self):
+        return self.db_client
+
     def get_doc_reference(self, collection: str, document_id: str):
         return self.db_client.document(f"{collection}/{document_id}")
 

@@ -31,3 +31,7 @@ class DBMainInterface(metaclass=ABCMeta):
     @abstractmethod
     def get_doc_reference(self, collection: str, document_id: str):
         pass
+
+    @abstractmethod
+    def get_db_client(self):
+        pass
